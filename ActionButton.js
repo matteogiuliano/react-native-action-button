@@ -8,9 +8,10 @@ const alignItemsMap = {
   "right" : "flex-end"
 }
 
-const shadowHeight = 12;
+
 
 export default class ActionButton extends Component {
+
 
   constructor(props) {
     super(props);
@@ -20,6 +21,13 @@ export default class ActionButton extends Component {
     }
 
     this.anim = new Animated.Value(props.active ? 1 : 0);
+    this.shadowHeight = new Animated.Value(6);
+    this.shadowRadius = new Animated.Value(2);
+    this.shadowOffset = {
+        width: 0,
+        height: 6
+    }
+
     this.timeout = null;
   }
 
@@ -48,7 +56,7 @@ export default class ActionButton extends Component {
   getButtonSize() {
     return {
       width: this.props.size + 16,
-      height: this.props.size + shadowHeight,
+      height: this.props.size + this.shadowHeight,
     }
   }
 
@@ -131,18 +139,35 @@ export default class ActionButton extends Component {
       },
     ];
 
+    this.shadowHeight = this.anim.interpolate({
+        inputRange: [0,1],
+        outputRange: [6, 12]
+    })
+
+    this.shadowRadius = this.anim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [2, 4]
+    })
+
     const combinedStyle = {
       width: this.props.size,
       height: this.props.size,
       borderRadius: this.props.size / 2,
-      marginBottom: shadowHeight,
+      marginBottom: 12,
       backgroundColor: this.props.buttonColor
     }
 
+
+    const animatedShadowStyle = {
+        shadowOffset: this.shadowOffset,
+        shadowRadius: this.shadowRadius,
+        elevation: this.shadowHeight,
+    }
+
     const actionButtonStyles = [ this.getActionButtonStyles(), combinedStyle, animatedViewStyle ]
-    const shadowStyles = [styles.btnShadow, combinedStyle]
+    const shadowStyles = [styles.btnShadow, combinedStyle, animatedShadowStyle]
     return (
-      <View style={[{ marginHorizontal: 8 }, !this.props.hideShadow && shadowStyles]}>
+      <Animated.View style={[{ marginHorizontal: 8 }, !this.props.hideShadow && shadowStyles]}>
         <TouchableOpacity
             activeOpacity={0.85}
             onLongPress={this.props.onLongPress}
@@ -154,7 +179,7 @@ export default class ActionButton extends Component {
             {this._renderButtonIcon()}
           </Animated.View>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     );
   }
 
@@ -236,7 +261,10 @@ export default class ActionButton extends Component {
     } else {
       this.anim.setValue(1);
     }
-
+    this.shadowOffset = {
+        width: 0,
+        height: 12
+    }
     this.setState({ active: true });
   }
 
@@ -248,7 +276,10 @@ export default class ActionButton extends Component {
     } else {
       this.anim.setValue(0);
     }
-
+    this.shadowOffset = {
+        width: 0,
+        height: 6
+    }
     setTimeout(() => this.setState({ active: false }), 250);
   }
 }
@@ -326,13 +357,13 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   btnShadow: {
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowOffset: {
-      width: 0, height: 8,
+      width: 0, height: 6,
     },
     shadowColor: '#000',
-    shadowRadius: 4,
-    elevation: 8,
+    shadowRadius: 2,
+    elevation: 6,
   },
   actionsVertical: {
     flex: 1,
